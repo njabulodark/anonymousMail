@@ -7,6 +7,7 @@ import os
 import sys
 import time
 import requests
+import chromedriver_autoinstaller
 
 audioToTextDelay = 10
 delayTime = 2
@@ -46,9 +47,10 @@ def audioToText(audioFile):
 
 try:
     # create chrome driver
+    chromedriver_autoinstaller.install()
     option = webdriver.ChromeOptions()
     option.add_argument('--disable-notifications')
-    driver = webdriver.Chrome(os.getcwd() + "\\chromedriver.exe", options=option)
+    driver = webdriver.Chrome(options=option)
     delay()
     # go to website which have recaptcha protection
     driver.get(URL)
@@ -57,16 +59,16 @@ except Exception as e:
         "[-] Please make sure the chrome drivers are in the code folder")
 
 
-email = driver.find_element_by_name("to")
-subject = driver.find_element_by_name("subject")
-message = driver.find_element_by_name("body")
+email = driver.find_element("name","to")
+subject = driver.find_element("name","subject")
+message = driver.find_element("name","body")
 
 # writing to the email
 email.send_keys('email@gmail.com')
 subject.send_keys("the subject")
 message.send_keys("your message")
 
-button = driver.find_element_by_id("send-button").click()
+button = driver.find_element("id", "send-button").click()
 
 """ recaptcha code"""
 delay()
@@ -74,8 +76,8 @@ delay()
 
 def recaptch():
     #click the recaptch box
-    g_recaptcha = driver.find_element_by_xpath("//*[contains(@src, 'https://www.google.com/recaptcha/api2/')]").click()
-    iframes = driver.find_elements_by_tag_name('iframe')
+    g_recaptcha = driver.find_element("xpath", "//*[contains(@src, 'https://www.google.com/recaptcha/api2/')]").click()
+    iframes = driver.find_elements("tag_name",'iframe')
     audioBtnFound = False
     audioBtnIndex = -1
 
