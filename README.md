@@ -1,2 +1,2 @@
 # anonymousMail
-send anonymous main
+send anonymous email
