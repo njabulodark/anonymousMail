@@ -19,7 +19,7 @@ class Mail:
         self.driver = None
     
     def delay(self):
-        time.sleep(random.randint(2, 3))
+        time.sleep(random.randint(4, 6))
 
     def audioToText(self, audioFile):
         # opening https://speech-to-text-demo.ng.bluemix.net/ in a new text
