@@ -8,6 +8,7 @@ import sys
 import time
 import requests
 import chromedriver_autoinstaller
+from anticaptchaofficial.recaptchav2proxyless import *
 
 audioToTextDelay = 10
 delayTime = 2
@@ -16,7 +17,7 @@ URL = "https://www.guerrillamail.com/compose"
 SpeechToTextURL = "https://speech-to-text-demo.ng.bluemix.net/"
 
 def delay():
-    time.sleep(random.randint(2, 3))
+    time.sleep(random.randint(4, 6))
 
 def audioToText(audioFile):
     # opening https://speech-to-text-demo.ng.bluemix.net/ in a new text
@@ -26,7 +27,7 @@ def audioToText(audioFile):
 
     #sending the audio
     delay()
-    audioInput = driver.find_element(By.XPATH, '//*[@id="root"]/div/input')
+    audioInput = driver.find_element(By.XPATH, '//*[@id="root"]/div/div[5]/button[2]')
     audioInput.send_keys(audioFile)
 
     time.sleep(audioToTextDelay)
@@ -50,6 +51,7 @@ try:
     chromedriver_autoinstaller.install()
     option = webdriver.ChromeOptions()
     option.add_argument('--disable-notifications')
+    option.add_argument('--window-size=480,480')
     driver = webdriver.Chrome(options=option)
     delay()
     # go to website which have recaptcha protection
@@ -77,17 +79,20 @@ delay()
 def recaptch():
     #click the recaptch box
     g_recaptcha = driver.find_element("xpath", "//*[contains(@src, 'https://www.google.com/recaptcha/api2/')]").click()
-    iframes = driver.find_elements("tag_name",'iframe')
+    iframes = driver.find_elements(By.TAG_NAME, 'iframe')
+    #iframes = driver.find_elements_by_tag_name('iframe')
     audioBtnFound = False
     audioBtnIndex = -1
 
     for index in range(len(iframes)):
         driver.switch_to.default_content()
-        iframe = driver.find_elements_by_tag_name('iframe')[index]
+        iframe = driver.find_elements(By.TAG_NAME, 'iframe')[index]
         driver.switch_to.frame(iframe)
         driver.implicitly_wait(delayTime)
         try:
-            audioBtn = driver.find_element_by_id("recaptcha-audio-button")
+            #audioBtn = driver.find_element_by_id("recaptcha-audio-button")
+            audioBtn = driver.find_element(By.ID,"recaptcha-audio-button")
+            id="recaptcha-audio-button"
             audioBtn.click()
             audioBtnFound = True
             audioBtnIndex = index
@@ -99,7 +104,7 @@ def recaptch():
         try:
             while True:
                 # get the mp3 audio file
-                src = driver.find_element_by_id("audio-source").get_attribute("src")
+                src = driver.find_element("id","audio-source").get_attribute("src")
                 print("[INFO] Audio src: %s" % src)
 
                 # download the mp3 audio file from the source
@@ -110,11 +115,11 @@ def recaptch():
                 print("[INFO] Recaptcha Key: %s" % key)
 
                 driver.switch_to.default_content()
-                iframe = driver.find_elements_by_tag_name('iframe')[audioBtnIndex]
+                iframe = driver.find_elements("tag_name", 'iframe')[audioBtnIndex]
                 driver.switch_to.frame(iframe)
 
                 # key in results and submit
-                inputField = driver.find_element_by_id("audio-response")
+                inputField = driver.find_element("id","audio-response")
                 inputField.send_keys(key)
                 delay()
                 inputField.send_keys(Keys.ENTER)

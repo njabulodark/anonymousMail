@@ -50,17 +50,17 @@ class Mail:
     def recaptch(self):
         #click the recaptch box
         g_recaptcha = self.driver.find_element("xpath", "//*[contains(@src, 'https://www.google.com/recaptcha/api2/')]").click()
-        iframes = self.driver.find_elements("tag_name",'iframe')
+        iframes = self.driver.find_elements(By.TAG_NAME, 'iframe')
         audioBtnFound = False
         audioBtnIndex = -1
 
         for index in range(len(iframes)):
             self.driver.switch_to.default_content()
-            iframe = self.driver.find_elements_by_tag_name('iframe')[index]
+            iframe = self.driver.find_elements(By.TAG_NAME, 'iframe')[index]
             self.driver.switch_to.frame(iframe)
             self.driver.implicitly_wait(self.delayTime)
             try:
-                audioBtn = self.driver.find_element_by_id("recaptcha-audio-button")
+                audioBtn = self.driver.find_element(By.ID,"recaptcha-audio-button")
                 audioBtn.click()
                 audioBtnFound = True
                 audioBtnIndex = index
@@ -72,22 +72,22 @@ class Mail:
             try:
                 while True:
                     # get the mp3 audio file
-                    src = self.driver.find_element_by_id("audio-source").get_attribute("src")
+                    src = self.driver.find_element(By.ID ,"audio-source").get_attribute("src")
                     print("[INFO] Audio src: %s" % src)
 
                     # download the mp3 audio file from the source
-                    urllib.request.urlretrieve(src, os.getcwd() + audioFile)
+                    urllib.request.urlretrieve(src, os.getcwd() + self.audioFile)
 
                     # Speech To Text Conversion
                     key = self.audioToText(os.getcwd() + self.audioFile)
                     print("[INFO] Recaptcha Key: %s" % key)
 
                     self.driver.switch_to.default_content()
-                    iframe = self.driver.find_elements_by_tag_name('iframe')[audioBtnIndex]
+                    iframe = self.driver.find_elements_by(By.TAG_NAME, 'iframe')[audioBtnIndex]
                     self.driver.switch_to.frame(iframe)
 
                     # key in results and submit
-                    inputField = self.driver.find_element_by_id("audio-response")
+                    inputField = self.driver.find_element(By.ID ,"audio-response")
                     inputField.send_keys(key)
                     self.delay()
                     inputField.send_keys(Keys.ENTER)
@@ -110,6 +110,7 @@ class Mail:
             chromedriver_autoinstaller.install()
             option = webdriver.ChromeOptions()
             option.add_argument('--disable-notifications')
+            option.add_argument('--window-size=480,480')
             self.driver = webdriver.Chrome(options=option)
             self.delay()
             # go to website which have recaptcha protection
@@ -141,6 +142,11 @@ class Mail:
         #closing the driver
         self.driver.close()
 
+
 if __name__ == "__main__":
     mail = Mail()
-    mail.sendMail(input("Type the email you wanna send to: "), input("Type the subject: "), input("Type the message: "))
+    with open("messages.txt", "r") as f:
+        messages = f.readlines()
+        for message in messages:
+            mail.sendMail(input("Type the email you wanna send to: "), "subject", message)
+            time.sleep(10)
